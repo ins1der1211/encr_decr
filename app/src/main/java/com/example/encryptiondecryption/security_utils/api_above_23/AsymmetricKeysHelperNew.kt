@@ -13,6 +13,7 @@ import android.util.Base64
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.encryptiondecryption.security_utils.AsymmetricKeysHelper
+import java.security.MessageDigest
 import java.security.spec.ECGenParameterSpec
 import javax.crypto.Cipher
 
@@ -67,12 +68,30 @@ class AsymmetricKeysHelperNew: AsymmetricKeysHelper {
 
         val entry = keyPair!!
 
+        with (Signature.getInstance("NonewithECDSA")) {
+            val md = MessageDigest.getInstance("SHA-256")
+            val digest = md.digest(data)
+            initSign(entry.privateKey)
+            update(digest)
+            val signatureeee = Base64.encodeToString(sign(), Base64.DEFAULT)
+            Log.d("SIGNATURE-NONE", signatureeee)
+
+            with(Signature.getInstance("SHA256withECDSA")) {
+                initVerify(entry.certificate)
+                update(data)
+                val res = verify(Base64.decode(signatureeee, Base64.DEFAULT))
+                Log.d("SIGNATURE-NONE_VER", "$res")
+            }
+        }
+
         val ss = signature
         ss.initSign(entry.privateKey)
         ss.update(data)
         val s = ss.sign()
 
-        return Base64.encodeToString(s, Base64.DEFAULT)
+        val aaa = Base64.encodeToString(s, Base64.DEFAULT)
+        Log.d("SIGNATURE-SHA256", aaa)
+        return aaa
     }
 
     override fun verifyData(input: String, signatureStr: String?): Boolean {
@@ -136,7 +155,7 @@ class AsymmetricKeysHelperNew: AsymmetricKeysHelper {
                     KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
         )
             .setCertificateSubject(X500Principal("CN=" + alias!!))
-            .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+            .setDigests(KeyProperties.DIGEST_NONE, KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
             .setCertificateNotBefore(start.time)
             .setCertificateNotAfter(end.time)
             .setKeyValidityStart(start.time)

@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
             secretKeyWrapperHelper = SecretKeyWrapperHelperNew(this)
             asymmetricKeysHelper = AsymmetricKeysHelperNew().apply {
                 alias = "asymmetricKeysHelper"
-                keyAlgorithm = KeyProperties.KEY_ALGORITHM_RSA
+                keyAlgorithm = KeyProperties.KEY_ALGORITHM_EC
             }
             asymmetricKeysHelper.createKeys()
         } else {
